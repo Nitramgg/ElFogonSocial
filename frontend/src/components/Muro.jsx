@@ -11,7 +11,7 @@ const Muro = () => {
 
   const getPosts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/posts');
+      const res = await axios.get('https://elfogonsocial.onrender.com');
       setPosts(res.data);
     } catch (error) {
       console.error("Error al obtener posts", error);
@@ -26,7 +26,7 @@ const Muro = () => {
     const token = localStorage.getItem('token');
     const config = { headers: { Authorization: `Bearer ${token}` } };
     try {
-      await axios.post('http://localhost:5000/api/posts', { text }, config);
+      await axios.post('https://elfogonsocial.onrender.com', { text }, config);
       setText('');
       getPosts();
     } catch (error) {
@@ -40,7 +40,7 @@ const Muro = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       try {
         // Usamos la URL completa para evitar errores de proxy
-        await axios.delete(`http://localhost:5000/api/posts/${id}`, config);
+        await axios.delete(`https://elfogonsocial.onrender.com${id}`, config);
         setPosts(posts.filter(p => p._id !== id));
       } catch (error) {
         console.error("Error al borrar:", error.response?.data || error.message);
