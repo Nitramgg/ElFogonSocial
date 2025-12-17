@@ -1,0 +1,172 @@
+:root {
+  --celeste: #74ACDF;
+  --blanco: #FFFFFF;
+  --negro-fondo: #121212;
+  --negro-card: #1E1E1E;
+  --texto-gris: #A0A0A0;
+}
+
+body {
+  margin: 0;
+  background-color: var(--negro-fondo);
+  color: var(--blanco);
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Contenedor responsivo */
+.muro-container { 
+  max-width: 600px; 
+  margin: 0 auto; 
+  padding: 15px; 
+}
+
+/* Header principal */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--celeste);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background-color: var(--negro-fondo);
+  z-index: 10;
+}
+
+.club-brand { display: flex; align-items: center; gap: 12px; }
+
+.club-escudo-img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.club-title { 
+  color: var(--celeste); 
+  text-transform: uppercase; 
+  font-size: 20px; 
+  margin: 0; 
+  font-weight: 800;
+}
+
+.user-nav { display: flex; align-items: center; gap: 10px; }
+.user-avatar-nav { 
+  width: 38px; 
+  height: 38px; 
+  border-radius: 50%; 
+  border: 2px solid var(--celeste); 
+}
+
+.btn-logout-minimal { 
+  background: none; 
+  border: none; 
+  color: var(--texto-gris); 
+  cursor: pointer; 
+  font-size: 14px;
+}
+
+/* Caja para escribir nuevos posts */
+.post-box { 
+  background: var(--negro-card); 
+  padding: 15px; 
+  border-radius: 12px; 
+  border: 1px solid #333;
+  margin-bottom: 25px;
+}
+
+textarea { 
+  width: 100%; 
+  background: transparent; 
+  border: none; 
+  color: white; 
+  font-size: 16px; 
+  outline: none; 
+  height: 70px; 
+  resize: none;
+}
+
+.post-footer { 
+  border-top: 1px solid #333; 
+  padding-top: 10px; 
+  display: flex; 
+  justify-content: flex-end; 
+}
+
+.btn-publicar { 
+  background: var(--celeste); 
+  color: #121212; 
+  font-weight: bold; 
+  border-radius: 20px; 
+  padding: 8px 22px; 
+  border: none; 
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-publicar:active { transform: scale(0.95); }
+
+/* Cartas de los mensajes del Feed */
+.post-card { 
+  background: var(--negro-card); 
+  padding: 16px; 
+  border-radius: 12px; 
+  margin-bottom: 15px; 
+  border: 1px solid #333; 
+}
+
+.post-header { 
+  display: flex; 
+  justify-content: space-between; /* Empuja el tacho a la derecha */
+  align-items: flex-start; 
+  margin-bottom: 12px; 
+}
+
+.avatar-post { 
+  width: 42px; 
+  height: 42px; 
+  border-radius: 50%; 
+}
+
+.post-info { 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.post-author { font-weight: bold; font-size: 15px; color: var(--blanco); }
+.post-date { font-size: 11px; color: var(--texto-gris); margin-top: 2px; }
+
+/* Botón de eliminar (Basurero) */
+.btn-delete {
+  background: transparent;
+  color: #444;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete:hover {
+  color: #ff4d4d;
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+.post-text { 
+  font-size: 16px; 
+  line-height: 1.5; 
+  margin: 0; 
+  color: #efefef;
+  word-wrap: break-word;
+}
+
+/* Ajustes para móviles */
+@media (max-width: 480px) {
+  .club-title { font-size: 18px; }
+  .club-escudo-img { width: 35px; height: 35px; }
+  .muro-container { padding: 10px; }
+}
