@@ -5,31 +5,33 @@ const passport = require('passport');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
-// Carga la configuración de passport
+// 1. Cargar configuración de passport
 require('./config/passport'); 
 
-// Conectamos a la base de datos
+// 2. Conectar a la base de datos
 connectDB(); 
 
-const app = express(); // ⬅️ DEFINIMOS APP PRIMERO
+// 3. INICIALIZAR APP (Esto debe ir acá arriba)
+const app = express(); 
 
-// --- Middlewares ---
+// 4. Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize()); 
 
-// --- Rutas ---
+// 5. Rutas de la API
 app.use('/api/posts', require('./routes/postRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
+// Ruta de prueba inicial
 app.get('/', (req, res) => {
     res.send('Servidor de El Fogón funcionando perfectamente 🏀');
 });
 
-// --- Manejo de Errores ---
+// 6. Manejo de Errores (Siempre al final de las rutas)
 app.use(errorHandler);
 
-// --- Iniciar Servidor (SOLO UNA VEZ Y AL FINAL) ---
+// 7. Iniciar el servidor (Única vez)
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`🔥 Servidor iniciado en el puerto ${port}`));
