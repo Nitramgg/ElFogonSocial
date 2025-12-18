@@ -57,6 +57,7 @@ body {
   height: 38px; 
   border-radius: 50%; 
   border: 2px solid var(--celeste); 
+  object-fit: cover; /* Para que la foto de Google no se estire */
 }
 
 .btn-logout-minimal { 
@@ -91,8 +92,24 @@ textarea {
   border-top: 1px solid #333; 
   padding-top: 10px; 
   display: flex; 
-  justify-content: flex-end; 
+  justify-content: space-between; /* Cambio a space-between para separar cámara de publicar */
+  align-items: center;
 }
+
+/* --- NUEVO: Estilo Botón Cámara --- */
+.btn-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-gris);
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+.btn-file:hover { color: var(--celeste); }
+.btn-file.active { color: var(--celeste); font-weight: bold; }
 
 .btn-publicar { 
   background: var(--celeste); 
@@ -116,9 +133,19 @@ textarea {
   border: 1px solid #333; 
 }
 
+/* --- NUEVO: Estilo Multimedia en el Feed --- */
+.post-media {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 12px;
+  border: 1px solid #333;
+}
+
 .post-header { 
   display: flex; 
-  justify-content: space-between; /* Empuja el tacho a la derecha */
+  justify-content: space-between; 
   align-items: flex-start; 
   margin-bottom: 12px; 
 }
@@ -127,6 +154,7 @@ textarea {
   width: 42px; 
   height: 42px; 
   border-radius: 50%; 
+  object-fit: cover;
 }
 
 .post-info { 
@@ -169,4 +197,5 @@ textarea {
   .club-title { font-size: 18px; }
   .club-escudo-img { width: 35px; height: 35px; }
   .muro-container { padding: 10px; }
+  .post-media { max-height: 300px; }
 }

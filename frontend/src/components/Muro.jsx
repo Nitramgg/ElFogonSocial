@@ -2,10 +2,11 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import escudo from '../assets/escudo.png';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Camera } from 'lucide-react'; // Añadimos Camera
 
 const Muro = () => {
   const [text, setText] = useState('');
+  const [file, setFile] = useState(null); // NUEVO: Estado para la foto/video
   const [posts, setPosts] = useState([]);
   const { user, logout } = useContext(AuthContext);
 
@@ -22,15 +23,32 @@ const Muro = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() && !file) return;
+
     const token = localStorage.getItem('token');
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+    
+    // CORRECCIÓN: Usamos FormData para enviar archivos
+    const formData = new FormData();
+    formData.append('text', text);
+    if (file) {
+      formData.append('file', file); // El nombre 'file' debe coincidir con upload.single('file')
+    }
+
+    const config = { 
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data' 
+      } 
+    };
+
     try {
-      await axios.post('https://elfogonsocial.onrender.com/api/posts', { text }, config);
+      await axios.post('https://elfogonsocial.onrender.com/api/posts', formData, config);
       setText('');
+      setFile(null); // Limpiamos el archivo después de subir
       getPosts();
     } catch (error) {
       console.error("Error al publicar", error);
+      alert("Error al subir el archivo. Verifica el tamaño.");
     }
   };
 
@@ -62,7 +80,6 @@ const Muro = () => {
           <h1 className="club-title">El Fogón</h1>
         </div>
         <div className="user-nav">
-          {/* CORRECCIÓN: Foto de perfil con No-Referrer */}
           {user?.foto ? (
             <img src={user.foto} referrerPolicy="no-referrer" alt="" className="user-avatar-nav" />
           ) : (
@@ -81,9 +98,24 @@ const Muro = () => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+          
           <div className="post-footer">
+            {/* Botón de archivo oculto */}
+            <input 
+              type="file" 
+              id="file-upload" 
+              accept="image/*,video/*" 
+              style={{ display: 'none' }} 
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+            <label htmlFor="file-upload" className={`btn-file ${file ? 'active' : ''}`}>
+              <Camera size={20} />
+              <span>{file ? "Archivo listo" : "Foto/Video"}</span>
+            </label>
+
             <button type="submit" className="btn-publicar">Publicar</button>
           </div>
+          {file && <p style={{fontSize:'12px', color:'var(--celeste)', marginTop:'5px'}}>Seleccionado: {file.name}</p>}
         </form>
       </div>
 
@@ -99,14 +131,22 @@ const Muro = () => {
                 </div>
               </div>
               
-              {/* COMPARACIÓN DE ID REFORZADA: String() asegura que coincidan */}
               {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
                 <button onClick={() => deletePost(post._id)} className="btn-delete">
                   <Trash2 size={18} />
                 </button>
               )}
             </div>
+            
             <p className="post-text">{post.text}</p>
+
+            {/* MOSTRAR CONTENIDO MULTIMEDIA */}
+            {post.image && (
+              <img src={post.image} alt="Post" className="post-media" style={{width:'100%', borderRadius:'8px', marginTop:'10px'}} />
+            )}
+            {post.video && (
+              <video src={post.video} controls className="post-media" style={{width:'100%', borderRadius:'8px', marginTop:'10px'}} />
+            )}
           </div>
         ))}
       </div>
