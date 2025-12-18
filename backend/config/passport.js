@@ -5,7 +5,8 @@ const User = require('../models/userModel');
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/users/auth/google/callback"
+    callbackURL: "https://elfogonsocial.onrender.com/api/users/auth/google/callback",
+    proxy: true
   },
   async (accessToken, refreshToken, profile, done) => {
     const newUser = {
