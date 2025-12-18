@@ -101,7 +101,7 @@ const Muro = () => {
               </div>
               
               {/* BOTÓN DE BORRAR: Comparamos IDs para ver si eres el dueño */}
-              {user && post.user && (user._id === post.user._id || user._id === post.user) && (
+              {user && post.user && (String(user._id) === String(post.user._id || post.user)) && (
                 <button onClick={() => deletePost(post._id)} className="btn-delete">
                   <Trash2 size={18} />
                 </button>
