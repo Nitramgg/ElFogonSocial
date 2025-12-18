@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { getPosts, setPost, deletePost } = require('../controllers/postController'); // <--- Aquí también debe estar
+const { getPosts, setPost, deletePost } = require('../controllers/postController');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware'); // 👈 Importamos el subidor
 
-router.route('/').get(getPosts).post(protect, setPost);
-router.route('/:id').delete(protect, deletePost); // Esta es la línea 8 que causaba el crash
+ router.route('/')
+    .get(getPosts)
+    .post(protect, upload.single('file'), setPost); 
+
+router.route('/:id').delete(protect, deletePost);
 
 module.exports = router;
