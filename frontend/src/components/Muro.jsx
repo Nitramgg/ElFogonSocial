@@ -62,8 +62,9 @@ const Muro = () => {
           <h1 className="club-title">El Fogón</h1>
         </div>
         <div className="user-nav">
+          {/* CORRECCIÓN: Foto de perfil con No-Referrer */}
           {user?.foto ? (
-            <img src={user.foto} referrerpolicy="no-referrer" alt="" className="user-avatar-nav" />
+            <img src={user.foto} referrerPolicy="no-referrer" alt="" className="user-avatar-nav" />
           ) : (
             <div className="user-avatar-nav" style={{display:'flex', alignItems:'center', justifyContent:'center', background:'var(--celeste)', color:'black', fontWeight:'bold'}}>
               {user?.name?.charAt(0)}
@@ -91,14 +92,14 @@ const Muro = () => {
           <div key={post._id} className="post-card">
             <div className="post-header">
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <img src={post.user?.foto || 'https://via.placeholder.com/40'} referrerpolicy="no-referrer" className="avatar-post" alt="" />
+                <img src={post.user?.foto || 'https://via.placeholder.com/40'} referrerPolicy="no-referrer" className="avatar-post" alt="" />
                 <div className="post-info">
                   <span className="post-author">{post.user?.name || 'Socio del Club'}</span>
                   <span className="post-date">{formatearFecha(post.createdAt)}</span>
                 </div>
               </div>
               
-              {/* COMPARACIÓN DE ID REFORZADA PARA EL TACHITO */}
+              {/* COMPARACIÓN DE ID REFORZADA: String() asegura que coincidan */}
               {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
                 <button onClick={() => deletePost(post._id)} className="btn-delete">
                   <Trash2 size={18} />
