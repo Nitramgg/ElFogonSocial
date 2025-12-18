@@ -3,7 +3,7 @@ import { useContext } from 'react';
 const Login = () => {
   const handleGoogleLogin = () => {
     // Redirigimos al endpoint de Google que creamos en el backend
-    window.location.href = 'http://localhost:5000/api/users/auth/google';
+    window.location.href = 'https://elfogonsocial.onrender.com';
   };
 
   return (
