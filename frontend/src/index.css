@@ -199,3 +199,46 @@ textarea {
   .muro-container { padding: 10px; }
   .post-media { max-height: 300px; }
 }
+
+/* Estilo para indicar que la imagen se puede tocar */
+.clickable {
+  cursor: zoom-in;
+  transition: opacity 0.3s;
+}
+
+.clickable:hover {
+  opacity: 0.9;
+}
+
+/* El fondo oscuro del modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* La imagen dentro del modal */
+.modal-content {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Botón para cerrar */
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

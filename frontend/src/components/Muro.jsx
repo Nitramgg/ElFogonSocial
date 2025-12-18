@@ -2,13 +2,17 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import escudo from '../assets/escudo.png';
-import { Trash2, Camera } from 'lucide-react';
+import { Trash2, Camera, X } from 'lucide-react'; // Sumamos el ícono X
 
 const Muro = () => {
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [isUploading, setIsUploading] = useState(false); // Estado para el botón de carga
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // ESTADO NUEVO: Para controlar qué imagen se está viendo en grande
+  const [selectedImg, setSelectedImg] = useState(null);
+
   const { user, logout } = useContext(AuthContext);
 
   const getPosts = async () => {
@@ -24,26 +28,19 @@ const Muro = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    
-    // Obligamos a que haya texto para que el post no falle
     if (!text.trim()) {
-      alert("Por favor, escribe una descripción para tu mensaje o foto.");
+      alert("Por favor, escribe una descripción.");
       return;
     }
 
-    setIsUploading(true); // Bloqueamos el botón
+    setIsUploading(true);
     const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('text', text);
-    if (file) {
-      formData.append('file', file);
-    }
+    if (file) formData.append('file', file);
 
     const config = { 
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data' 
-      } 
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } 
     };
 
     try {
@@ -53,9 +50,8 @@ const Muro = () => {
       getPosts();
     } catch (error) {
       console.error("Error al publicar", error);
-      alert("Hubo un error al subir. Intenta con una imagen más liviana.");
     } finally {
-      setIsUploading(false); // Liberamos el botón
+      setIsUploading(false);
     }
   };
 
@@ -67,32 +63,28 @@ const Muro = () => {
         await axios.delete(`https://elfogonsocial.onrender.com/api/posts/${id}`, config);
         setPosts(posts.filter(p => p._id !== id));
       } catch (error) {
-        console.error("Error al borrar:", error.response?.data || error.message);
+        console.error("Error al borrar:", error);
       }
     }
   };
 
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleString('es-AR', {
-      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-    });
-  };
-
   return (
     <div className="muro-container">
+      {/* --- MODAL DE IMAGEN (Zoom) --- */}
+      {selectedImg && (
+        <div className="modal-overlay" onClick={() => setSelectedImg(null)}>
+          <button className="modal-close"><X size={30} color="white" /></button>
+          <img src={selectedImg} alt="Zoom" className="modal-content" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
       <header className="header">
         <div className="club-brand">
           <img src={escudo} alt="" className="club-escudo-img" />
           <h1 className="club-title">El Fogón</h1>
         </div>
         <div className="user-nav">
-          {user?.foto ? (
-            <img src={user.foto} referrerPolicy="no-referrer" alt="" className="user-avatar-nav" />
-          ) : (
-            <div className="user-avatar-nav" style={{display:'flex', alignItems:'center', justifyContent:'center', background:'var(--celeste)', color:'black', fontWeight:'bold'}}>
-              {user?.name?.charAt(0)}
-            </div>
-          )}
+          <img src={user?.foto} referrerPolicy="no-referrer" className="user-avatar-nav" alt="" />
           <button onClick={logout} className="btn-logout-minimal">Salir</button>
         </div>
       </header>
@@ -100,35 +92,20 @@ const Muro = () => {
       <div className="post-box">
         <form onSubmit={onSubmit}>
           <textarea 
-            placeholder="Escribe una descripción para tu foto o video..."
+            placeholder="Escribe una descripción..."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-          
           <div className="post-footer">
-            <input 
-              type="file" 
-              id="file-upload" 
-              accept="image/*,video/*" 
-              style={{ display: 'none' }} 
-              onChange={(e) => setFile(e.target.files[0])}
-              disabled={isUploading}
-            />
-            <label htmlFor="file-upload" className={`btn-file ${file ? 'active' : ''}`} style={{ opacity: isUploading ? 0.5 : 1 }}>
+            <input type="file" id="file-upload" accept="image/*,video/*" style={{ display: 'none' }} onChange={(e) => setFile(e.target.files[0])} disabled={isUploading} />
+            <label htmlFor="file-upload" className={`btn-file ${file ? 'active' : ''}`}>
               <Camera size={20} />
-              <span>{file ? "Archivo listo" : "Foto/Video"}</span>
+              <span>{file ? "Listo" : "Foto/Video"}</span>
             </label>
-
-            <button 
-              type="submit" 
-              className="btn-publicar" 
-              disabled={isUploading || !text.trim()}
-              style={{ opacity: (isUploading || !text.trim()) ? 0.6 : 1 }}
-            >
-              {isUploading ? "Publicando..." : "Publicar"}
+            <button type="submit" className="btn-publicar" disabled={isUploading || !text.trim()}>
+              {isUploading ? "..." : "Publicar"}
             </button>
           </div>
-          {file && <p style={{fontSize:'12px', color:'var(--celeste)', marginTop:'5px'}}>Seleccionado: {file.name}</p>}
         </form>
       </div>
 
@@ -137,28 +114,27 @@ const Muro = () => {
           <div key={post._id} className="post-card">
             <div className="post-header">
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <img src={post.user?.foto || 'https://via.placeholder.com/40'} referrerPolicy="no-referrer" className="avatar-post" alt="" />
+                <img src={post.user?.foto} referrerPolicy="no-referrer" className="avatar-post" alt="" />
                 <div className="post-info">
-                  <span className="post-author">{post.user?.name || 'Socio del Club'}</span>
-                  <span className="post-date">{formatearFecha(post.createdAt)}</span>
+                  <span className="post-author">{post.user?.name}</span>
                 </div>
               </div>
-              
               {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
-                <button onClick={() => deletePost(post._id)} className="btn-delete">
-                  <Trash2 size={18} />
-                </button>
+                <button onClick={() => deletePost(post._id)} className="btn-delete"><Trash2 size={18} /></button>
               )}
             </div>
-            
             <p className="post-text">{post.text}</p>
-
+            
+            {/* CLICK PARA ABRIR EL MODAL */}
             {post.image && (
-              <img src={post.image} alt="Post" className="post-media" style={{width:'100%', borderRadius:'8px', marginTop:'10px'}} />
+              <img 
+                src={post.image} 
+                className="post-media clickable" 
+                alt="" 
+                onClick={() => setSelectedImg(post.image)} 
+              />
             )}
-            {post.video && (
-              <video src={post.video} controls className="post-media" style={{width:'100%', borderRadius:'8px', marginTop:'10px'}} />
-            )}
+            {post.video && <video src={post.video} controls className="post-media" />}
           </div>
         ))}
       </div>
