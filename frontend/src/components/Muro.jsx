@@ -2,12 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import escudo from '../assets/escudo.png';
-import { Trash2, Camera } from 'lucide-react'; // Añadimos Camera
+import { Trash2, Camera } from 'lucide-react';
 
 const Muro = () => {
   const [text, setText] = useState('');
-  const [file, setFile] = useState(null); // NUEVO: Estado para la foto/video
+  const [file, setFile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [isUploading, setIsUploading] = useState(false); // Estado para el botón de carga
   const { user, logout } = useContext(AuthContext);
 
   const getPosts = async () => {
@@ -23,15 +24,19 @@ const Muro = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !file) return;
-
-    const token = localStorage.getItem('token');
     
-    // CORRECCIÓN: Usamos FormData para enviar archivos
+    // Obligamos a que haya texto para que el post no falle
+    if (!text.trim()) {
+      alert("Por favor, escribe una descripción para tu mensaje o foto.");
+      return;
+    }
+
+    setIsUploading(true); // Bloqueamos el botón
+    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('text', text);
     if (file) {
-      formData.append('file', file); // El nombre 'file' debe coincidir con upload.single('file')
+      formData.append('file', file);
     }
 
     const config = { 
@@ -44,11 +49,13 @@ const Muro = () => {
     try {
       await axios.post('https://elfogonsocial.onrender.com/api/posts', formData, config);
       setText('');
-      setFile(null); // Limpiamos el archivo después de subir
+      setFile(null);
       getPosts();
     } catch (error) {
       console.error("Error al publicar", error);
-      alert("Error al subir el archivo. Verifica el tamaño.");
+      alert("Hubo un error al subir. Intenta con una imagen más liviana.");
+    } finally {
+      setIsUploading(false); // Liberamos el botón
     }
   };
 
@@ -61,7 +68,6 @@ const Muro = () => {
         setPosts(posts.filter(p => p._id !== id));
       } catch (error) {
         console.error("Error al borrar:", error.response?.data || error.message);
-        alert("No tienes permiso para borrar este post.");
       }
     }
   };
@@ -94,26 +100,33 @@ const Muro = () => {
       <div className="post-box">
         <form onSubmit={onSubmit}>
           <textarea 
-            placeholder="¿Qué novedades hay en el club?"
+            placeholder="Escribe una descripción para tu foto o video..."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
           
           <div className="post-footer">
-            {/* Botón de archivo oculto */}
             <input 
               type="file" 
               id="file-upload" 
               accept="image/*,video/*" 
               style={{ display: 'none' }} 
               onChange={(e) => setFile(e.target.files[0])}
+              disabled={isUploading}
             />
-            <label htmlFor="file-upload" className={`btn-file ${file ? 'active' : ''}`}>
+            <label htmlFor="file-upload" className={`btn-file ${file ? 'active' : ''}`} style={{ opacity: isUploading ? 0.5 : 1 }}>
               <Camera size={20} />
               <span>{file ? "Archivo listo" : "Foto/Video"}</span>
             </label>
 
-            <button type="submit" className="btn-publicar">Publicar</button>
+            <button 
+              type="submit" 
+              className="btn-publicar" 
+              disabled={isUploading || !text.trim()}
+              style={{ opacity: (isUploading || !text.trim()) ? 0.6 : 1 }}
+            >
+              {isUploading ? "Publicando..." : "Publicar"}
+            </button>
           </div>
           {file && <p style={{fontSize:'12px', color:'var(--celeste)', marginTop:'5px'}}>Seleccionado: {file.name}</p>}
         </form>
@@ -140,7 +153,6 @@ const Muro = () => {
             
             <p className="post-text">{post.text}</p>
 
-            {/* MOSTRAR CONTENIDO MULTIMEDIA */}
             {post.image && (
               <img src={post.image} alt="Post" className="post-media" style={{width:'100%', borderRadius:'8px', marginTop:'10px'}} />
             )}
