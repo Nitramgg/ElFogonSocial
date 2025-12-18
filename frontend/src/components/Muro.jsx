@@ -40,7 +40,7 @@ const Muro = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       try {
         // Usamos la URL completa para evitar errores de proxy
-        await axios.delete(`https://elfogonsocial.onrender.com/api/posts${id}`, config);
+        await axios.delete(`https://elfogonsocial.onrender.com/api/posts/${id}`, config);
         setPosts(posts.filter(p => p._id !== id));
       } catch (error) {
         console.error("Error al borrar:", error.response?.data || error.message);
