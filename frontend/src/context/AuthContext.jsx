@@ -7,13 +7,21 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Definimos la URL de tu backend en Render
+  const API_URL = 'https://elfogonsocial.onrender.com';
+
   const fetchUser = async (token) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get('/api/users/me', config);
+      // CORRECCIÓN: Agregamos la URL completa de Render
+      const response = await axios.get(`${API_URL}/api/users/me`, config);
+      
+      // Guardamos el usuario completo (incluyendo el _id y la foto que devuelve el backend)
       setUser(response.data);
     } catch (error) {
+      console.error("Error al obtener usuario:", error);
       localStorage.removeItem('token');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -27,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     if (tokenURL) {
       localStorage.setItem('token', tokenURL);
       fetchUser(tokenURL);
+      // Limpiamos la URL para que no quede el token a la vista
       window.history.replaceState({}, document.title, "/");
     } else if (tokenLocal) {
       fetchUser(tokenLocal);
