@@ -35,9 +35,13 @@ router.get('/auth/google/callback',
         // Generamos el token para el usuario que Google validó
         const token = generateToken(req.user._id);
         
-        // Redirigimos al frontend pasándole el token por la URL
-        // Nota: localhost:3000 es donde correrá tu React/Vite más adelante
-        res.redirect(`https://el-fogon-social.vercel.app/muro?token=${token}`);
+        // Definimos la URL del frontend dependiendo de dónde estemos
+        const frontendURL = process.env.NODE_ENV === 'production' 
+            ? 'https://el-fogon-social.vercel.app'
+            : 'http://localhost:5173';
+
+        // Redirigimos al frontend con el token
+        res.redirect(`${frontendURL}?token=${token}`);
     }
 );
 
