@@ -56,7 +56,7 @@ const deletePost = asyncHandler(async (req, res) => {
     res.status(200).json({ id: req.params.id });
 });
 
-// @desc    Dar o quitar like a un post (NUEVA FUNCIÓN)
+// @desc    Dar o quitar like a un post
 const likePost = asyncHandler(async (req, res) => {
     const post = await Post.findById(req.params.id);
 
@@ -65,20 +65,24 @@ const likePost = asyncHandler(async (req, res) => {
         throw new Error('Post no encontrado');
     }
 
-    // El ID del usuario viene de req.user.id (del middleware protect)
     const userId = req.user.id;
 
-    // Si el usuario ya está en el array de likes, lo sacamos; si no, lo sumamos
-    if (post.likes.includes(userId)) {
+    // Convertimos todos los likes actuales a String para comparar sin errores
+    const alreadyLiked = post.likes.some(id => id.toString() === userId.toString());
+
+    if (alreadyLiked) {
+        // Si ya está, lo quitamos
         post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
     } else {
+        // Si no está, lo agregamos
         post.likes.push(userId);
     }
 
-    await post.save();
+    // IMPORTANTE: Guardamos y capturamos el resultado actualizado
+    const updatedPost = await post.save();
     
-    // Devolvemos el post actualizado con los likes
-    res.status(200).json(post.likes);
+    // Devolvemos los likes del post recién guardado
+    res.status(200).json(updatedPost.likes);
 });
 
 module.exports = {

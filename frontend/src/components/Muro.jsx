@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import escudo from '../assets/escudo.png';
-import { Trash2, Camera, X, Heart } from 'lucide-react'; // Añadimos Heart
+import { Trash2, Camera, X, Heart } from 'lucide-react';
 
 const Muro = () => {
   const [text, setText] = useState('');
@@ -22,9 +22,11 @@ const Muro = () => {
     }
   };
 
-  useEffect(() => { getPosts(); }, []);
+  useEffect(() => {
+    getPosts();
+  }, []);
 
-  // --- NUEVA FUNCIÓN: Manejar el Like ---
+  // --- FUNCIÓN DE LIKE CORREGIDA ---
   const handleLike = async (postId) => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -32,14 +34,16 @@ const Muro = () => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     try {
+      // Enviamos la petición al backend
       const res = await axios.put(`https://elfogonsocial.onrender.com/api/posts/${postId}/like`, {}, config);
       
-      // Actualizamos el estado de los posts con la nueva lista de likes
-      setPosts(posts.map(post => 
+      // IMPORTANTE: res.data ahora contiene el array de likes actualizado
+      // Actualizamos el estado local para que el cambio sea instantáneo
+      setPosts(prevPosts => prevPosts.map(post => 
         post._id === postId ? { ...post, likes: res.data } : post
       ));
     } catch (error) {
-      console.error("Error al dar like", error);
+      console.error("Error al procesar like", error);
     }
   };
 
@@ -127,8 +131,9 @@ const Muro = () => {
 
       <div className="feed">
         {posts.map((post) => {
-          // Verificamos si el usuario logueado ya dio like
-          const hasLiked = post.likes?.includes(user?._id || user?.id);
+          // Lógica robusta para verificar si el usuario dio like
+          const currentUserId = user?._id || user?.id;
+          const hasLiked = post.likes?.some(likeId => String(likeId) === String(currentUserId));
 
           return (
             <div key={post._id} className="post-card">
@@ -139,10 +144,11 @@ const Muro = () => {
                     <span className="post-author">{post.user?.name}</span>
                   </div>
                 </div>
-                {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
+                {user && post.user && (String(currentUserId) === String(post.user._id || post.user)) && (
                   <button onClick={() => deletePost(post._id)} className="btn-delete"><Trash2 size={18} /></button>
                 )}
               </div>
+              
               <p className="post-text">{post.text}</p>
               
               {post.image && (
@@ -155,13 +161,17 @@ const Muro = () => {
               )}
               {post.video && <video src={post.video} controls className="post-media" />}
 
-              {/* --- BOTÓN DE LIKES --- */}
+              {/* SECCIÓN DE ACCIONES (LIKE) */}
               <div className="post-actions">
                 <button 
                   className={`btn-like ${hasLiked ? 'liked' : ''}`}
                   onClick={() => handleLike(post._id)}
                 >
-                  <Heart size={20} fill={hasLiked ? "#ff4b4b" : "transparent"} color={hasLiked ? "#ff4b4b" : "#888"} />
+                  <Heart 
+                    size={20} 
+                    fill={hasLiked ? "#ff4b4b" : "none"} 
+                    color={hasLiked ? "#ff4b4b" : "#888"} 
+                  />
                   <span>{post.likes?.length || 0}</span>
                 </button>
               </div>
