@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPosts, setPost, deletePost } = require('../controllers/postController');
+const { getPosts, setPost, deletePost, likePost } = require('../controllers/postController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware'); // 👈 Importamos el subidor
 
