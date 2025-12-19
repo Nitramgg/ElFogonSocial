@@ -2,15 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import escudo from '../assets/escudo.png';
-import { Trash2, Camera, X } from 'lucide-react'; // Sumamos el ícono X
+import { Trash2, Camera, X, Heart } from 'lucide-react'; // Añadimos Heart
 
 const Muro = () => {
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  
-  // ESTADO NUEVO: Para controlar qué imagen se está viendo en grande
   const [selectedImg, setSelectedImg] = useState(null);
 
   const { user, logout } = useContext(AuthContext);
@@ -25,6 +23,25 @@ const Muro = () => {
   };
 
   useEffect(() => { getPosts(); }, []);
+
+  // --- NUEVA FUNCIÓN: Manejar el Like ---
+  const handleLike = async (postId) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+
+    try {
+      const res = await axios.put(`https://elfogonsocial.onrender.com/api/posts/${postId}/like`, {}, config);
+      
+      // Actualizamos el estado de los posts con la nueva lista de likes
+      setPosts(posts.map(post => 
+        post._id === postId ? { ...post, likes: res.data } : post
+      ));
+    } catch (error) {
+      console.error("Error al dar like", error);
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -70,7 +87,6 @@ const Muro = () => {
 
   return (
     <div className="muro-container">
-      {/* --- MODAL DE IMAGEN (Zoom) --- */}
       {selectedImg && (
         <div className="modal-overlay" onClick={() => setSelectedImg(null)}>
           <button className="modal-close"><X size={30} color="white" /></button>
@@ -110,33 +126,48 @@ const Muro = () => {
       </div>
 
       <div className="feed">
-        {posts.map((post) => (
-          <div key={post._id} className="post-card">
-            <div className="post-header">
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <img src={post.user?.foto} referrerPolicy="no-referrer" className="avatar-post" alt="" />
-                <div className="post-info">
-                  <span className="post-author">{post.user?.name}</span>
+        {posts.map((post) => {
+          // Verificamos si el usuario logueado ya dio like
+          const hasLiked = post.likes?.includes(user?._id || user?.id);
+
+          return (
+            <div key={post._id} className="post-card">
+              <div className="post-header">
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <img src={post.user?.foto} referrerPolicy="no-referrer" className="avatar-post" alt="" />
+                  <div className="post-info">
+                    <span className="post-author">{post.user?.name}</span>
+                  </div>
                 </div>
+                {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
+                  <button onClick={() => deletePost(post._id)} className="btn-delete"><Trash2 size={18} /></button>
+                )}
               </div>
-              {user && post.user && (String(user._id || user.id) === String(post.user._id || post.user)) && (
-                <button onClick={() => deletePost(post._id)} className="btn-delete"><Trash2 size={18} /></button>
+              <p className="post-text">{post.text}</p>
+              
+              {post.image && (
+                <img 
+                  src={post.image} 
+                  className="post-media clickable" 
+                  alt="" 
+                  onClick={() => setSelectedImg(post.image)} 
+                />
               )}
+              {post.video && <video src={post.video} controls className="post-media" />}
+
+              {/* --- BOTÓN DE LIKES --- */}
+              <div className="post-actions">
+                <button 
+                  className={`btn-like ${hasLiked ? 'liked' : ''}`}
+                  onClick={() => handleLike(post._id)}
+                >
+                  <Heart size={20} fill={hasLiked ? "#ff4b4b" : "transparent"} color={hasLiked ? "#ff4b4b" : "#888"} />
+                  <span>{post.likes?.length || 0}</span>
+                </button>
+              </div>
             </div>
-            <p className="post-text">{post.text}</p>
-            
-            {/* CLICK PARA ABRIR EL MODAL */}
-            {post.image && (
-              <img 
-                src={post.image} 
-                className="post-media clickable" 
-                alt="" 
-                onClick={() => setSelectedImg(post.image)} 
-              />
-            )}
-            {post.video && <video src={post.video} controls className="post-media" />}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

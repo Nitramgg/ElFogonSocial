@@ -242,3 +242,54 @@ textarea {
   border: none;
   cursor: pointer;
 }
+
+/* --- SECCIÓN DE LIKES --- */
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #333;
+}
+
+.btn-like {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-gris);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+/* Efecto al pasar el mouse (solo en PC) */
+@media (min-width: 768px) {
+  .btn-like:hover {
+    background-color: rgba(255, 75, 75, 0.1);
+    color: #ff4b4b;
+  }
+}
+
+/* Cuando el usuario ya dio like */
+.btn-like.liked {
+  color: #ff4b4b;
+}
+
+.btn-like span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Animación de latido al hacer click */
+.btn-like:active svg {
+  transform: scale(1.4);
+  transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-like svg {
+  transition: transform 0.2s ease;
+}
