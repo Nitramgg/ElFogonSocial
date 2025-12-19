@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
 const Post = require('../models/postModel');
-// Importamos cloudinary para poder borrar archivos de la nube si eliminamos el post
 const cloudinary = require('cloudinary').v2;
 
 // @desc    Obtener todos los posts
@@ -16,13 +15,11 @@ const setPost = asyncHandler(async (req, res) => {
         throw new Error('Por favor teclea un mensaje o sube una imagen');
     }
 
-    // Preparamos el objeto del post
     const postData = {
         text: req.body.text,
         user: req.user.id,
     };
 
-    // Si viene un archivo desde el middleware de Cloudinary
     if (req.file) {
         if (req.file.mimetype.startsWith('video')) {
             postData.video = req.file.path;
@@ -49,10 +46,8 @@ const deletePost = asyncHandler(async (req, res) => {
         throw new Error('Usuario no autorizado');
     }
 
-    // OPCIONAL: Lógica para borrar la imagen de Cloudinary al borrar el post
     if (post.image || post.video) {
         const fileUrl = post.image || post.video;
-        // Extraemos el ID público de la URL para borrarlo en Cloudinary
         const publicId = fileUrl.split('/').pop().split('.')[0];
         await cloudinary.uploader.destroy(`el_fogon_posts/${publicId}`);
     }
@@ -61,8 +56,34 @@ const deletePost = asyncHandler(async (req, res) => {
     res.status(200).json({ id: req.params.id });
 });
 
+// @desc    Dar o quitar like a un post (NUEVA FUNCIÓN)
+const likePost = asyncHandler(async (req, res) => {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+        res.status(404);
+        throw new Error('Post no encontrado');
+    }
+
+    // El ID del usuario viene de req.user.id (del middleware protect)
+    const userId = req.user.id;
+
+    // Si el usuario ya está en el array de likes, lo sacamos; si no, lo sumamos
+    if (post.likes.includes(userId)) {
+        post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+    } else {
+        post.likes.push(userId);
+    }
+
+    await post.save();
+    
+    // Devolvemos el post actualizado con los likes
+    res.status(200).json(post.likes);
+});
+
 module.exports = {
     getPosts,
     setPost,
-    deletePost
+    deletePost,
+    likePost // No te olvides de exportarla aquí
 };

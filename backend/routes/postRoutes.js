@@ -9,5 +9,6 @@ const upload = require('../middleware/uploadMiddleware'); // 👈 Importamos el 
     .post(protect, upload.single('file'), setPost); 
 
 router.route('/:id').delete(protect, deletePost);
+router.put('/:id/like', protect, likePost);
 
 module.exports = router;

@@ -18,7 +18,10 @@ const postSchema = mongoose.Schema({
     video: {
         type: String, // URL del video si el socio sube uno
         default: null
-    }
+    },
+    likes: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    ],
 }, {
     timestamps: true
 });
